@@ -10,8 +10,9 @@ name_elem = '.fastq.gz'  #write file ending here
 
 #references
 # Paste your STAR index and GTF paths here
-STAR_INDEX = ""
-GTF = ""
+STAR_INDEX = "/home/tomasz.turowski/seq_references/EF4.74_final/EF4.74_STAR_index"
+GTF = "references/Saccharomyces_cerevisiae.EF4.74_SGDv64_CUTandSUT_withUTRs_noEstimates_antisense_intergenic_4xlncRNAs_final.pyCheckGTFfile.output.corrected.gtf"
+
 
 
 if not STAR_INDEX or not GTF:
@@ -82,7 +83,9 @@ rule all:
 		expand("04a_BigWig_umitools/{sample}_all_umitools_reads_fwd.bw",sample=SAMPLES),
 		expand("04a_BigWig_umitools/{sample}_all_umitools_reads_rev.bw",sample=SAMPLES),
 		expand("04a_BigWig_umitools/{sample}_all_umitools_CPM_fwd.bw",sample=SAMPLES),
-		expand("04a_BigWig_umitools/{sample}_all_umitools_CPM_rev.bw",sample=SAMPLES)
+		expand("04a_BigWig_umitools/{sample}_all_umitools_CPM_rev.bw",sample=SAMPLES),
+		expand("04_BigWig/{sample}.sam",sample=SAMPLES),
+		expand("04a_BigWig_umitools/{sample}.sam",sample=SAMPLES)
 
 rule no_umitools:
 	input:
@@ -96,7 +99,8 @@ rule no_umitools:
 		expand("04_BigWig/{sample}_all_reads_fwd.bw",sample=SAMPLES),
 		expand("04_BigWig/{sample}_all_reads_rev.bw",sample=SAMPLES),
 		expand("04_BigWig/{sample}_all_CPM_fwd.bw",sample=SAMPLES),
-		expand("04_BigWig/{sample}_all_CPM_rev.bw",sample=SAMPLES)
+		expand("04_BigWig/{sample}_all_CPM_rev.bw",sample=SAMPLES),
+		expand("04_BigWig/{sample}.sam",sample=SAMPLES)
 
 ########## PREPROCESSING ##########
 
@@ -233,8 +237,8 @@ rule align_all:
 		bam_all = "02b_alignment_all/{sample}_all_STAR_Aligned.out.bam"
 	conda:
 		"envs/processing.yml"
-	# resources:
-	# 	mem_mb=32000
+	resources:
+		mem_mb=32000
 	shell:
 		"STAR --outFileNamePrefix {params.prefix_all} --readFilesCommand zcat --genomeDir {params.index_dir} --genomeLoad LoadAndRemove --outSAMtype BAM Unsorted --readFilesIn {input.reads_all} --limitOutSJcollapsed 2000000"
 
@@ -249,6 +253,8 @@ rule align_all_umitools:
 		bam_all = "02c_alignment_all_umitools/{sample}_all_STAR_Aligned.out.bam"
 	conda:
 		"envs/processing.yml"
+	resources:
+		mem_mb=32000
 	shell:
 		"STAR --outFileNamePrefix {params.prefix_all} --readFilesCommand zcat --genomeDir {params.index_dir} --genomeLoad LoadAndRemove --outSAMtype BAM Unsorted --readFilesIn {input.reads_all} --limitOutSJcollapsed 2000000"
 
@@ -473,12 +479,25 @@ rule BigWigs_umitools_raw:
 		bamCoverage --bam {input.bam} -of bigwig -o {output.bwM} --filterRNAstrand forward --binSize 1
 		"""
 
-rule bam2sam_umitools: #optional, need to run manually
+rule bam2sam:
+	input:
+		bam = "02b_alignment_all/{sample}_all.bam",
+		bai = "02b_alignment_all/{sample}_all.bam.bai"
+	output:
+		sam = "04_BigWig/{sample}.sam"
+	conda:
+		"envs/processing.yml"
+	shell:
+		"""
+		samtools view -h {input.bam} > {output.sam}
+		"""
+
+rule bam2sam_umitools:
 	input:
 		bam = "02c_alignment_all_umitools/{sample}_all_dedup.bam",
 		bai = "02c_alignment_all_umitools/{sample}_all_dedup.bam.bai"
 	output:
-		sam = "04b_BigWig_umitools/{sample}.sam"
+		sam = "04a_BigWig_umitools/{sample}.sam"
 	conda:
 		"envs/processing.yml"
 	shell:
