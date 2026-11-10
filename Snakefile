@@ -1,8 +1,7 @@
 import re, os, subprocess
 import pandas as pd
 
-# command used to create processing env
-# mamba create -n processing -y -c conda-forge -c bioconda deeptools pyCRAC salmon star subread fastx_toolkit samtools
+AVAILABLE_MEM = 32000  #in MB, for STAR alignment
 
 #paths
 path = "00_raw/"
@@ -10,7 +9,7 @@ name_elem = '.fastq.gz'  #write file ending here
 
 #references
 # Paste your STAR index and GTF paths here
-STAR_INDEX = "/home/tomasz.turowski/seq_references/EF4.74_final/EF4.74_STAR_index"
+STAR_INDEX = "references/EF4.74_STAR_index"
 GTF = "references/Saccharomyces_cerevisiae.EF4.74_SGDv64_CUTandSUT_withUTRs_noEstimates_antisense_intergenic_4xlncRNAs_final.pyCheckGTFfile.output.corrected.gtf"
 
 
