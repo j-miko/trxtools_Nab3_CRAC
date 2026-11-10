@@ -5,6 +5,9 @@ Instructions for reproduction:
 
 2. Run `00_raw/rename.sh` to rename files.
 
+## Download STAR index
+Download [EF4.74_STAR_index.zip](https://iobbpas-my.sharepoint.com/:f:/g/personal/jmikolajczyk_iobbpas_onmicrosoft_com/IgBmZDQ8uGH5QrbcYZK4DcInAb6uFGeWHVbCDE6rvM3Dp4c?e=7uI9pq) and extract into the `references/` directory.
+
 ## Set up snakemake environment
 1. Install conda if not already installed. [Mamba/miniforge3](https://github.com/conda-forge/miniforge) recommended.
 
